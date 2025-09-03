@@ -1,25 +1,28 @@
 const express = require('express');
 const cors = require('cors');
-const app = express();
 
-// Porta que o Railway vai usar via variável de ambiente ou padrão 3000 local
+const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware para permitir requisições CORS (de qualquer origem)
-app.use(cors());
+// ✅ CONFIGURAÇÃO DE CORS
+const corsOptions = {
+  origin: '*', // Pode usar 'https://seusite.vercel.app' no lugar de '*' para mais segurança
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+};
 
-// Middleware para interpretar JSON no corpo da requisição
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// "Banco de dados" simples em memória
-const qrCodes = {}; // Exemplo: { id123: { data: 'texto', expiresAt: '2025-09-04T00:00:00Z' } }
+// 🗃 Banco de dados em memória
+const qrCodes = {}; // Ex: { id123: { data: 'algum texto', expiresAt: '2025-09-04T00:00:00Z' } }
 
-// Rota raiz para testar se o servidor está online
+// 🌐 Rota de teste
 app.get('/', (req, res) => {
   res.send('✅ Servidor rodando! Backend QR Code ativo.');
 });
 
-// Rota para criar um novo QR code
+// ✅ Rota de criação de QR Code
 app.post('/create', (req, res) => {
   const { id, data, expiresAt } = req.body;
 
@@ -28,13 +31,12 @@ app.post('/create', (req, res) => {
   }
 
   qrCodes[id] = { data, expiresAt };
-
   console.log(`📦 QR Code salvo: ${id} → expira em ${expiresAt}`);
 
   res.json({ success: true, id });
 });
 
-// Rota para acessar o QR code, verifica validade
+// 🔍 Rota de verificação do QR Code
 app.get('/qrcode', (req, res) => {
   const { id } = req.query;
 
@@ -52,7 +54,7 @@ app.get('/qrcode', (req, res) => {
   res.send(`✅ QR Code válido! Conteúdo: ${data}`);
 });
 
-// Inicializa o servidor
+// 🚀 Iniciar o servidor
 app.listen(port, () => {
   console.log(`🚀 Servidor rodando na porta ${port}`);
 });
