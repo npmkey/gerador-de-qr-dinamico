@@ -4,8 +4,9 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Configuração CORS - ajuste o origin para seu frontend em produção
 const corsOptions = {
-  origin: '*', // Em produção, especifique seu domínio, ex: 'https://meusite.com'
+  origin: '*', // Mude para a URL do seu frontend em produção, ex: 'https://meusite.com'
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 };
@@ -13,12 +14,15 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Banco em memória
 const qrCodes = {};
 
+// Rota raiz
 app.get('/', (req, res) => {
   res.send('✅ Servidor rodando! Backend QR Code ativo.');
 });
 
+// Criar QR Code
 app.post('/create', (req, res) => {
   const { id, data, expiresAt } = req.body;
 
@@ -32,8 +36,12 @@ app.post('/create', (req, res) => {
   res.json({ success: true, id });
 });
 
+// Buscar QR Code
 app.get('/qrcode', (req, res) => {
   const { id } = req.query;
+
+  console.log('Buscando QR Code para id:', id);
+  console.log('QR Codes armazenados:', qrCodes);
 
   if (!id || !qrCodes[id]) {
     return res.status(404).send('❌ QR Code não encontrado.');
@@ -44,11 +52,6 @@ app.get('/qrcode', (req, res) => {
 
   if (new Date(expiresAt) < now) {
     return res.status(410).send('⛔ QR Code expirado.');
-  }
-
-  // Se o dado for link, redireciona
-  if (data.startsWith('http://') || data.startsWith('https://')) {
-    return res.redirect(data);
   }
 
   res.send(`✅ QR Code válido! Conteúdo: ${data}`);
