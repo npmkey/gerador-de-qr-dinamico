@@ -4,26 +4,21 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ✅ CONFIGURAÇÃO CORRETA DO CORS
 const corsOptions = {
-  origin: '*', // Em produção, troque '*' por: 'https://seusite.vercel.app'
+  origin: '*', // Em produção, especifique seu domínio, ex: 'https://meusite.com'
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 };
 
-// Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Banco de dados em memória
 const qrCodes = {};
 
-// Rota raiz
 app.get('/', (req, res) => {
   res.send('✅ Servidor rodando! Backend QR Code ativo.');
 });
 
-// Rota de criação de QR Code
 app.post('/create', (req, res) => {
   const { id, data, expiresAt } = req.body;
 
@@ -37,7 +32,6 @@ app.post('/create', (req, res) => {
   res.json({ success: true, id });
 });
 
-// Rota de verificação de QR Code
 app.get('/qrcode', (req, res) => {
   const { id } = req.query;
 
@@ -52,10 +46,14 @@ app.get('/qrcode', (req, res) => {
     return res.status(410).send('⛔ QR Code expirado.');
   }
 
+  // Se o dado for link, redireciona
+  if (data.startsWith('http://') || data.startsWith('https://')) {
+    return res.redirect(data);
+  }
+
   res.send(`✅ QR Code válido! Conteúdo: ${data}`);
 });
 
-// Start server
 app.listen(port, () => {
   console.log(`🚀 Servidor rodando na porta ${port}`);
 });
