@@ -6,7 +6,7 @@ const port = process.env.PORT || 3000;
 
 // ✅ CONFIGURAÇÃO DE CORS
 const corsOptions = {
-  origin: '*', // Pode usar 'https://seusite.vercel.app' no lugar de '*' para mais segurança
+  origin: 'https://gerador-de-qr-dinamico-h37durr9q-sherylery5-gmailcoms-projects.vercel.app', /
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 };
@@ -58,3 +58,4 @@ app.get('/qrcode', (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor rodando na porta ${port}`);
 });
+
