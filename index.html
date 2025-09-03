@@ -64,8 +64,7 @@
   <!-- CDN da biblioteca QRCode -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
-    // Troque para o IP correto se for acessar do celular, por exemplo "http://192.168.1.5:3000"
-    const apiBase = 'http://localhost:3000';
+    const apiBase = 'https://gerador-de-qr-dinamico-production.up.railway.app';
 
     function generateId() {
       return Math.random().toString(36).substr(2, 9);
@@ -104,7 +103,6 @@
         document.getElementById('status').textContent = 'QR Code válido até: ' + new Date(expiresAt).toLocaleString();
 
         const url = `${apiBase}/qrcode?id=${id}`;
-
         QRCode.toCanvas(url, { width: 200 }, (err, canvas) => {
           if (err) {
             console.error(err);
@@ -113,7 +111,7 @@
           }
 
           const container = document.getElementById('qrcode');
-          container.innerHTML = ''; // limpa QR Code anterior
+          container.innerHTML = ''; // limpa QR anterior
           container.appendChild(canvas);
         });
 
