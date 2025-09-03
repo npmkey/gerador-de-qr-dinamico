@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR Code com Expiração</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #222;
+      color: #fff;
+      text-align: center;
+      padding: 40px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      border-radius: 5px;
+    }
+
+    input[type="datetime-local"] {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+    }
+
+    button {
+      background: #06f;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #qrcode {
+      margin-top: 30px;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>QR Code com Data de Expiração</h1>
+
+  <input type="text" id="textInput" placeholder="Texto ou link" />
+  <br />
+  <input type="datetime-local" id="expirationInput" />
+  <br />
+  <button onclick="generateQRCode()">Gerar QR Code</button>
+
+  <div id="status"></div>
+  <div id="qrcode"></div>
+
+  <!-- CDN da biblioteca QRCode -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const apiBase = 'http://localhost:3000'; // altere para seu IP se for usar no celular
+
+    function generateId() {
+      return Math.random().toString(36).substr(2, 9);
+    }
+
+    async function generateQRCode() {
+      const text = document.getElementById('textInput').value.trim();
+      const expiresAt = document.getElementById('expirationInput').value;
+
+      if (!text || !expiresAt) {
+        alert('Preencha o texto e a data de expiração!');
+        return;
+      }
+
+      const id = generateId();
+
+      const payload = {
+        id,
+        data: text,
+        expiresAt: new Date(expiresAt).toISOString(),
+      };
+
+      try {
+        const res = await fetch(`${apiBase}/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json.error || 'Erro desconhecido');
+        }
+
+        document.getElementById('status').textContent = 'QR Code válido até: ' + new Date(expiresAt).toLocaleString();
+
+        const url = `${apiBase}/qrcode?id=${id}`;
+        QRCode.toCanvas(url, { width: 200 }, (err, canvas) => {
+          if (err) {
+            console.error(err);
+            alert('Erro ao gerar QR Code');
+            return;
+          }
+
+          const container = document.getElementById('qrcode');
+          container.innerHTML = ''; // limpa anterior
+          container.appendChild(canvas);
+        });
+
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao criar QR Code: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
